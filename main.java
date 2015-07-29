@@ -1,10 +1,14 @@
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		String testIn = ". ^";
 		String[] splitTest = testIn.split(" ");
 		//System.out.println(splitTest.length);
@@ -30,6 +34,9 @@ public class main {
 			int curVal = counter.get(splitTest[i]);
 			counter.put(splitTest[i], curVal+1);
 		}
+		FileOutputStream fout = new FileOutputStream("hash.txt");
+		ObjectOutputStream oos = new ObjectOutputStream(fout);
+		oos.writeObject(myMap);
 		//System.out.println(myMap.get(".").values().size());
 		//System.out.println(myMap.values());
 		// Create
