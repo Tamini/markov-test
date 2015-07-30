@@ -1,19 +1,52 @@
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class main {
 
-	public static void main(String[] args) throws IOException {
-		String testIn = ". ^";
+	// http://stackoverflow.com/questions/326390/how-to-create-a-java-string-from-the-contents-of-a-file
+	static String readFile(String path, Charset encoding) 
+			  throws IOException 
+			{
+			  byte[] encoded = Files.readAllBytes(Paths.get(path));
+			  return new String(encoded, encoding);
+			}
+	
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
+		boolean first = true;
+		String content = readFile("input.txt", Charset.defaultCharset());
+		content = content.replaceAll("[\n-\"]", " ");
+		content = content.replaceAll("[,.!?;:]", " $0");
+		String testIn = ". " + content + " ^";
 		String[] splitTest = testIn.split(" ");
 		//System.out.println(splitTest.length);
-		HashMap<String, HashMap<String,Integer>> myMap = new HashMap<String, HashMap<String, Integer>>();
-		HashMap<String, Integer> counter = new HashMap<String, Integer>();
+		HashMap<String, HashMap<String,Integer>> myMap;
+		HashMap<String, Integer> counter;
+		if (first){
+		myMap = new HashMap<String, HashMap<String, Integer>>();
+		counter = new HashMap<String, Integer>();
+		}
+		else {
+			FileInputStream fin = new FileInputStream("hash.txt");
+			ObjectInputStream oos = new ObjectInputStream(fin);
+			myMap = (HashMap<String, HashMap<String, Integer>>) oos.readObject();
+			oos.close();
+			fin.close();
+			FileInputStream fcount = new FileInputStream("count.txt");
+			ObjectInputStream coos = new ObjectInputStream(fcount);
+			counter = (HashMap<String, Integer>) coos.readObject();
+			coos.close();
+			fcount.close();
+		}
 		for (int i = 0; i<splitTest.length-1; i++){
 			HashMap<String, Integer> tempMap;
 			if (!myMap.containsKey(splitTest[i])){
@@ -37,12 +70,16 @@ public class main {
 		FileOutputStream fout = new FileOutputStream("hash.txt");
 		ObjectOutputStream oos = new ObjectOutputStream(fout);
 		oos.writeObject(myMap);
+		FileOutputStream fcount = new FileOutputStream("count.txt");
+		ObjectOutputStream coos = new ObjectOutputStream(fcount);
+		coos.writeObject(counter);
 		//System.out.println(myMap.get(".").values().size());
 		//System.out.println(myMap.values());
 		// Create
 		String next = ".";
+		StringBuilder combined = new StringBuilder();
 		while (!next.equals("^")){
-			System.out.print(next + " ");
+			combined.append(next + " ");
 			HashMap<String, Integer> innerMap = myMap.get(next);
 			int numVals = counter.get(next);
 			//System.out.println(innerMap.keySet());
@@ -58,6 +95,7 @@ public class main {
 				}
 			}
 		}
+		System.out.println(combined);
 	}
 
 }
